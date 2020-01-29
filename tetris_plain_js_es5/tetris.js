@@ -14,7 +14,7 @@ function Tetris() {
 
     this.addEventListeners();
 
-    this.gameStatus = 'start' // start play, pause , end
+    this.gameStatus = 'start' // start play, pause, end
 
     this.globalCheckIsRunning = false;
 }
