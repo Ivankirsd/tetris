@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tetris</title>
+        <link rel="stylesheet" href="./css/index.css">
+
+        <script defer src="./template.js"></script>
+        <script defer src="./figure.js"></script>
+        <script defer src="./tetris.js"></script>
+        <script defer src="./index.js"></script>
+        
+    </head>
+    <body>
+        <div id="tetris-container">
+
+            <div id="playing-area-container">
+                <div id="playing-area"></div>
+            </div>
+            <div id="score-container">
+                <div>
+                    <button class="btn" id="pause-btn" type="button">Pause</button>
+                </div>
+                <div id="score"></div>
+                <div id="figures">
+                </div>
+            </div>
+        </div>
+
+
+        <div id="start-stop-modal">
+            <div id="start-stop-container">
+                <div id="score-result-container">
+                    <div id="score-result"></div>
+                </div>
+                <div id="continue-btn-container">
+                    <button class="btn" id="continue-btn" type="button">Continue this game</button>
+                </div>
+                <div>
+                    <button class="btn" id="start-btn" type="button">Start new game</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
