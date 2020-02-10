@@ -13,9 +13,7 @@ import {TetrisService} from './services/tetris.service';
 export class AppComponent implements OnInit {
   menuIsOpen$: Observable<boolean>;
 
-  constructor(
-    private tetrisService: TetrisService,
-  ) {}
+  constructor( private tetrisService: TetrisService ) {}
 
   ngOnInit() {
     this.menuIsOpen$ = this.tetrisService.gameStatusSubject
@@ -26,7 +24,7 @@ export class AppComponent implements OnInit {
   }
 
   @HostListener('window:keydown', ['$event'])
-  checkPressedKey($event) {
-    this.tetrisService.checkPressedKey($event);
+  moveFigureByPressedKey($event) {
+    this.tetrisService.moveFigureByPressedKey($event.key);
   }
 }

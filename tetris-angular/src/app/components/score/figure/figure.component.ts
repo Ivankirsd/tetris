@@ -1,17 +1,26 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Figure} from '../../../services/figure.service';
+import {FigureModel} from '../../../models/types';
+import {Figure} from '../../../classes/figure';
 
 @Component({
   selector: 'app-figure',
   templateUrl: './figure.component.html',
   styleUrls: ['./figure.component.scss']
 })
-export class FigureComponent implements OnInit {
-  @Input() figure: Figure;
+export class FigureComponent {
+  figureModel: FigureModel;
 
-  constructor() { }
-
-  ngOnInit() {
+  @Input() set figure(figure: Figure) {
+    this.figureModel = figure.getFigureModel();
   }
 
+  constructor() {}
+
+  trackByRowFn(index: number): number {
+    return index;
+  }
+
+  trackByCellFn(index: number, item: number): string {
+    return `${index}_${item}`;
+  }
 }

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import TETRIS_CONSTANTS from '../contants/tetrisConstants';
-import {Figure} from './figure.service';
 import {FigureModel, FigureModelWithPositions, PlayingArea} from '../models/types';
+import {Figure} from '../classes/figure';
 
 
 @Injectable({
@@ -9,8 +9,7 @@ import {FigureModel, FigureModelWithPositions, PlayingArea} from '../models/type
 })
 export class BoardService {
 
-  constructor() {
-  }
+  constructor() {}
 
   public generatePlayingArea(
     syzeX = TETRIS_CONSTANTS.PLAYING_AREA_SYZE_X,
@@ -164,5 +163,4 @@ export class BoardService {
     }
     return false;
   }
-
 }

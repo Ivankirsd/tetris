@@ -12,14 +12,11 @@ import {distinctUntilChanged, tap} from 'rxjs/operators';
 export class MenuComponent implements OnInit {
   score$: Observable<number>;
   gameStatus$: Observable<string>;
-  continueBtnIsViewed$ = false;
+  displayContinueGameBtn$ = false;
 
   GAME_STATUSES = TETRIS_CONSTANTS.GAME_STATUSES;
 
-  constructor(
-    private tetrisService: TetrisService
-  ) {
-  }
+  constructor(private tetrisService: TetrisService) {}
 
   ngOnInit() {
     this.score$ = this.tetrisService.scoreSubject;
@@ -27,7 +24,7 @@ export class MenuComponent implements OnInit {
       .pipe(
         distinctUntilChanged(),
         tap(gameStatus => {
-          this.continueBtnIsViewed$ = gameStatus === this.GAME_STATUSES.PAUSE;
+          this.displayContinueGameBtn$ = gameStatus === this.GAME_STATUSES.PAUSE;
         })
       );
   }
@@ -39,5 +36,4 @@ export class MenuComponent implements OnInit {
   startGame() {
     this.tetrisService.startGame();
   }
-
 }

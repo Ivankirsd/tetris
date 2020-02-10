@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {Figure} from '../../services/figure.service';
 import {TetrisService} from '../../services/tetris.service';
-import {BehaviorSubject} from 'rxjs';
+import {Observable} from 'rxjs/internal/Observable';
+import {Figure} from '../../classes/figure';
 
 @Component({
   selector: 'app-score',
@@ -9,12 +9,10 @@ import {BehaviorSubject} from 'rxjs';
   styleUrls: ['./score.component.scss']
 })
 export class ScoreComponent implements OnInit {
-  score$: BehaviorSubject<number> = null;
-  figures$: BehaviorSubject<Figure[]>;
+  score$: Observable<number> = null;
+  figures$: Observable<Figure[]>;
 
-  constructor(
-    private tetrisService: TetrisService,
-  ) {}
+  constructor(private tetrisService: TetrisService) {}
 
   ngOnInit() {
     this.score$ = this.tetrisService.scoreSubject;
@@ -25,4 +23,7 @@ export class ScoreComponent implements OnInit {
     this.tetrisService.pauseGame();
   }
 
+  trackByFn(index: number): number {
+    return index;
+  }
 }

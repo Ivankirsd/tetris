@@ -3,10 +3,8 @@
 #score-container {
   display: flex;
   flex-direction: column;
-
   width: 100px;
   min-width: 100px;
-
   background-color: $score-background-color;
 
   > div {
@@ -29,11 +27,3 @@
     flex-direction: column;
   }
 }
-
-
-
-
-
-
-
-

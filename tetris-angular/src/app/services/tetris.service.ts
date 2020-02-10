@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import TETRIS_CONSTANTS from '../contants/tetrisConstants';
 import {BoardService} from './board.service';
-import {Figure, FigureService} from './figure.service';
+import {FigureService} from './figure.service';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {GameStatus, PlayingArea} from '../models/types';
+import {Figure} from '../classes/figure';
 
 
 @Injectable({
@@ -115,7 +116,7 @@ export class TetrisService {
     }
   }
 
-  checkPressedKey({key = null}) {
+  moveFigureByPressedKey(key: string = null) {
     if (key === null || this.gameStatusSubject.getValue() !== TETRIS_CONSTANTS.GAME_STATUSES.PLAY) {
       return;
     }
@@ -165,5 +166,4 @@ export class TetrisService {
     window.clearInterval(this.intervalId);
     this.intervalId = null;
   }
-
 }

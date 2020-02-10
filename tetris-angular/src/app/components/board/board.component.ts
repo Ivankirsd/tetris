@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {PlayingArea} from '../../models/types';
 import {TetrisService} from '../../services/tetris.service';
@@ -12,9 +12,7 @@ import {filter, map} from 'rxjs/operators';
 export class BoardComponent implements OnInit {
   playingAreaWithFigure$: Observable<PlayingArea>;
 
-  constructor(
-    private tetrisService: TetrisService,
-  ) { }
+  constructor(private tetrisService: TetrisService) {}
 
   ngOnInit() {
     this.playingAreaWithFigure$ = this.tetrisService.playingAreaWithFigureSubject
@@ -37,12 +35,11 @@ export class BoardComponent implements OnInit {
       );
   }
 
-  trackByRowFn(index: number, item: number[]): number {
+  trackByRowFn(index: number): number {
     return index;
   }
 
   trackByCellFn(index: number, item: number): string {
     return `${index}_${item}`;
   }
-
 }
