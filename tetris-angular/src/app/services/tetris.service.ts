@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import TETRIS_CONSTANTS from '../contants/tetrisConstants';
 import {BoardService} from './board.service';
-import {Figure, FigureService} from './figure.service';
+import {FigureService} from './figure.service';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {GameStatus, PlayingArea} from '../models/types';
+import {Figure} from '../classes/figure';
 
 
 @Injectable({
@@ -39,7 +40,7 @@ export class TetrisService {
     this.gameStatusSubject = new BehaviorSubject<GameStatus>(TETRIS_CONSTANTS.GAME_STATUSES.START);
   }
 
-  startGame(): void {
+  public startGame(): void {
     this.playingArea = this.boardService.generatePlayingArea(this.playingAreaSyzeX, this.playingAreaSyzeY);
     this.generateFigures();
 
@@ -49,22 +50,22 @@ export class TetrisService {
     this.gameStatusSubject.next(TETRIS_CONSTANTS.GAME_STATUSES.PLAY);
   }
 
-  pauseGame(): void {
+  public pauseGame(): void {
     this.gameStatusSubject.next(TETRIS_CONSTANTS.GAME_STATUSES.PAUSE);
     this.clearInterval();
   }
 
-  stopGame(): void {
+  private stopGame(): void {
     this.gameStatusSubject.next(TETRIS_CONSTANTS.GAME_STATUSES.END);
     this.clearInterval();
   }
 
-  continueGame(): void {
+  public continueGame(): void {
     this.gameStatusSubject.next(TETRIS_CONSTANTS.GAME_STATUSES.PLAY);
     this.startInterval();
   }
 
-  globalCheck(): void {
+  private globalCheck(): void {
     this.globalCheckIsRunning = true;
 
     if (!this.focusedFigure) {
@@ -87,7 +88,7 @@ export class TetrisService {
     this.globalCheckIsRunning = false;
   }
 
-  generateFigures(): void {
+  private generateFigures(): void {
     const maxFiguresArrayLength = 4;
     let figuresArray: Figure[] = this.figuresArraySubject.getValue();
 
@@ -100,7 +101,7 @@ export class TetrisService {
     this.figuresArraySubject.next(figuresArray);
   }
 
-  checkScore(): void {
+  private checkScore(): void {
     let scoreLocal = 0;
 
     this.playingArea.forEach((row, i) => {
@@ -115,9 +116,9 @@ export class TetrisService {
     }
   }
 
-  checkPressedKey({key = null}) {
+  public moveFigureByPressedKey(key: string = null): boolean {
     if (key === null || this.gameStatusSubject.getValue() !== TETRIS_CONSTANTS.GAME_STATUSES.PLAY) {
-      return;
+      return false;
     }
 
     switch (key) {
@@ -146,7 +147,7 @@ export class TetrisService {
     }
   }
 
-  moveFigureDown(): void {
+  private moveFigureDown(): void {
     if (!this.globalCheckIsRunning) {
       if (!this.boardService.moveFigureDown(this.playingArea, this.focusedFigure)) {
         this.focusedFigure = null;
@@ -155,15 +156,14 @@ export class TetrisService {
     }
   }
 
-  startInterval(): void {
+  private startInterval(): void {
     this.intervalId = window.setInterval(() => {
       this.moveFigureDown();
     }, 1000);
   }
 
-  clearInterval(): void {
+  private clearInterval(): void {
     window.clearInterval(this.intervalId);
     this.intervalId = null;
   }
-
 }

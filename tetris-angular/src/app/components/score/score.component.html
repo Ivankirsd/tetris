@@ -5,7 +5,7 @@
   <div id="score">Score {{score$ | async}}</div>
   <div id="figures">
     <app-figure
-      *ngFor="let figure of figures$ | async"
+      *ngFor="let figure of figures$ | async; trackBy: trackByFn"
       [figure]="figure"
     ></app-figure>
   </div>
