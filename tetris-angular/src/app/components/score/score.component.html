@@ -1,0 +1,12 @@
+<div id="score-container">
+  <div>
+    <button class="btn" id="pause-btn" type="button" (click)="pauseGame()">Pause</button>
+  </div>
+  <div id="score">Score {{score$ | async}}</div>
+  <div id="figures">
+    <app-figure
+      *ngFor="let figure of figures$ | async"
+      [figure]="figure"
+    ></app-figure>
+  </div>
+</div>

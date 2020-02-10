@@ -1,0 +1,22 @@
+<div id="start-stop-modal">
+  <div id="start-stop-container">
+    <div id="score-result-container">
+      <div id="score-result">
+        <ng-container [ngSwitch]="gameStatus$ | async">
+          <ng-container *ngSwitchCase="GAME_STATUSES.END">
+            <div>Game over!</div><div>Your score is {{score$ | async}}</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="GAME_STATUSES.PAUSE">
+            Score {{score$ | async}}
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+    <div *ngIf="continueBtnIsViewed$">
+      <button class="btn" id="continue-btn" type="button" (click)="continueGame()">Continue this game</button>
+    </div>
+    <div>
+      <button class="btn" id="start-btn" type="button" (click)="startGame()">Start new game</button>
+    </div>
+  </div>
+</div>

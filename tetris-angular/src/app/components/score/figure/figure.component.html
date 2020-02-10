@@ -1,0 +1,9 @@
+<div class="figure">
+  <div class="row" *ngFor="let row of figure.getFigureModel()">
+    <div
+      *ngFor="let cell of row"
+      class="cell"
+      [class.active-cell]="cell"
+    ></div>
+  </div>
+</div>
