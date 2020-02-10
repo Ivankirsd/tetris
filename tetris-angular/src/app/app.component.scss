@@ -1,0 +1,20 @@
+@import "../variables";
+
+#tetris-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+
+  app-board {
+    display: flex;
+    width: 100%;
+  }
+
+  app-score {
+    display: flex;
+    width: 100px;
+    min-width: 100px;
+  }
+}

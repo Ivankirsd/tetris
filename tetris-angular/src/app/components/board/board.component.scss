@@ -1,0 +1,31 @@
+@import "../../../variables";
+
+#board-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: $board-container-background-color;
+
+  #board {
+    height: 90vmin;
+    width: calc(90vmin/1.66);
+    background-color: $board-background-color;
+  }
+
+  .row {
+    display: flex;
+    width: 100%;
+    height: 5%;
+
+    .cell {
+      display: flex;
+      width: 8.333%;
+      min-width: 8.333%;
+      box-sizing: border-box;
+      padding: 5px;
+      border: 1px solid $cell-border-color;
+    }
+  }
+}

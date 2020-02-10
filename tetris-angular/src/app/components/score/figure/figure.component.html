@@ -1,0 +1,9 @@
+<div class="figure">
+  <div class="row" *ngFor="let row of figureModel; trackBy: trackByRowFn">
+    <div
+      *ngFor="let cell of row; trackBy: trackByCellFn"
+      class="cell"
+      [class.active-cell]="cell"
+    ></div>
+  </div>
+</div>

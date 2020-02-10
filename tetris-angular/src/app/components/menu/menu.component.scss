@@ -1,0 +1,47 @@
+@import "../../../variables";
+
+#start-stop-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $menu-background-color;
+
+  #start-stop-container {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    min-width: 300px;
+    height: 30%;
+
+    position: relative;
+    left: -50px; /* #score-container width/2 */
+
+    > div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      height: 33.3%;
+      font-size: $menu-font-size;
+
+      button {
+        display: block;
+        height: 60px;
+        width: 100%;
+        font-size: $menu-font-size;
+      }
+    }
+
+    #score-result {
+      display: flex;
+      flex-flow: column;
+      text-align: center;
+      color: $menu-text-color;
+    }
+  }
+}
