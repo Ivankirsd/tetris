@@ -21,14 +21,18 @@ export class BoardService {
   }
 
   public removeFullRowFromPlayingArea(playingArea: PlayingArea, index: number): void {
-    if (!playingArea || index < 0 || index > playingArea.length) {
-      return;
+    if (!this.playingAreaIsValid(playingArea)) {
+      throw Error(`RemoveFullRowFromPlayingArea() executed with error. PlayingArea param is invalid. PlayingArea param is ${playingArea}`);
     }
 
-    playingArea.splice(index, 1);
-    const rowLength = playingArea[0].length;
+    if (!Number.isInteger(index) || index < 0 || index > playingArea.length - 1) {
+      throw Error(`Index is invalid. Index = ${index}`);
+    }
 
+    const rowLength = playingArea[0].length;
     const newRow = Array(rowLength).fill(null);
+
+    playingArea.splice(index, 1);
     playingArea.unshift(newRow);
   }
 
@@ -38,12 +42,19 @@ export class BoardService {
     positionY: number = null,
     figureModel: FigureModel
   ): boolean {
-    if (!playingArea || positionX === null || positionY === null || !figureModel) {
+
+    if (
+      !this.playingAreaIsValid(playingArea) ||
+      !Number.isFinite(positionX) ||
+      !Number.isFinite(positionY) ||
+      !this.figureModelIsValid(figureModel)
+    ) {
       return false;
     }
 
     const midX = Math.floor(figureModel[0].length / 2);
     const midY = Math.floor(figureModel.length / 2);
+
 
     return figureModel.every((row, i) => {
       return row.every((cell, j) => {
@@ -63,7 +74,10 @@ export class BoardService {
   }
 
   private setFigureToPlayingArea(playingArea: PlayingArea, figureModel: FigureModelWithPositions): void {
-    if (!playingArea || !figureModel) {
+    if (
+      !this.playingAreaIsValid(playingArea) ||
+      !this.figureModelIsValid(figureModel)
+    ) {
       return;
     }
 
@@ -77,8 +91,12 @@ export class BoardService {
   }
 
   public flipFigure(playingArea: PlayingArea, focusedFigure: Figure): boolean {
-    if (!playingArea || !focusedFigure) {
-      return;
+    if (
+      !this.playingAreaIsValid(playingArea) ||
+      !focusedFigure ||
+      !(focusedFigure instanceof Figure)
+    ) {
+      return false;
     }
 
     const oldFigure: FigureModel = focusedFigure.getFigureModel();
@@ -105,12 +123,12 @@ export class BoardService {
   }
 
   public moveFigureDown(playingArea: PlayingArea, focusedFigure: Figure): boolean {
-    if (!playingArea) {
-      throw Error(`playingArea is ${playingArea}.`);
+    if (!this.playingAreaIsValid(playingArea)) {
+      throw Error(`moveFigureDown() executed with error. PlayingArea param is invalid. PlayingArea param is ${playingArea}`);
     }
 
-    if (!focusedFigure) {
-      throw Error(`focusedFigure is ${focusedFigure}.`);
+    if (!focusedFigure || !(focusedFigure instanceof Figure)) {
+      throw Error(`Figure param is invalid. Figure is ${focusedFigure}`);
     }
 
     if (
@@ -129,8 +147,13 @@ export class BoardService {
   }
 
   public moveFigureLeft(playingArea: PlayingArea, focusedFigure: Figure): boolean {
-    if (!playingArea || !focusedFigure) {
-      return false;
+    if (!this.playingAreaIsValid(playingArea)) {
+      throw Error(`moveFigureLeft() executed with error. PlayingArea param is invalid. PlayingArea param is ${playingArea}`);
+
+    }
+
+    if (!focusedFigure || !(focusedFigure instanceof Figure)) {
+      throw Error(`Figure param is invalid. Figure is ${focusedFigure}`);
     }
 
     if (
@@ -148,8 +171,13 @@ export class BoardService {
   }
 
   public moveFigureRight(playingArea: PlayingArea, focusedFigure: Figure): boolean {
-    if (!playingArea || !focusedFigure) {
-      return false;
+    if (!this.playingAreaIsValid(playingArea)) {
+      throw Error(`moveFigureRight() executed with error. PlayingArea param is invalid. PlayingArea param is ${playingArea}`);
+
+    }
+
+    if (!focusedFigure || !(focusedFigure instanceof Figure)) {
+      throw Error(`Figure param is invalid. Figure is ${focusedFigure}`);
     }
 
     if (this.canSetFigureToPlayingArea(
@@ -162,5 +190,25 @@ export class BoardService {
       return true;
     }
     return false;
+  }
+
+  private playingAreaIsValid(playingArea: PlayingArea): boolean {
+    return !(
+      !playingArea ||
+      !Array.isArray(playingArea) ||
+      playingArea.length === 0 ||
+      !Array.isArray(playingArea[0]) ||
+      playingArea[0].length === 0
+    );
+  }
+
+  private figureModelIsValid(figureModel: FigureModel | FigureModelWithPositions): boolean {
+    return !(
+      !figureModel ||
+      !Array.isArray(figureModel) ||
+      figureModel.length === 0 ||
+      !Array.isArray(figureModel[0]) ||
+      figureModel[0].length === 0
+    );
   }
 }

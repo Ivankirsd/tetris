@@ -9,11 +9,11 @@ import { FigureComponent } from './components/score/figure/figure.component';
 
 @NgModule({
   declarations: [
-    AppComponent,
     BoardComponent,
     MenuComponent,
     ScoreComponent,
-    FigureComponent
+    FigureComponent,
+    AppComponent,
   ],
   imports: [
     BrowserModule
