@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, HostListener, OnInit} from '@angular/core';
-import TETRIS_CONSTANTS from './contants/tetrisConstants';
 import {distinctUntilChanged, map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {TetrisService} from './services/tetris.service';
+import tetrisConstants from './contants/tetrisConstants';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
     this.menuIsOpen$ = this.tetrisService.gameStatusSubject
       .pipe(
         distinctUntilChanged(),
-        map(gameStatus => gameStatus !== TETRIS_CONSTANTS.GAME_STATUSES.PLAY),
+        map(gameStatus => gameStatus !== tetrisConstants.GAME_STATUSES.PLAY),
       );
   }
 
