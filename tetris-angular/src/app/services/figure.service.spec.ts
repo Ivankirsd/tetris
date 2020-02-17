@@ -10,28 +10,36 @@ describe('FigureService', () => {
   beforeEach(() => {
     figureService = new FigureService();
   });
+  afterEach(() => {
+    figureService = null;
+  });
 
   it('should be created', () => {
     expect(figureService).toBeTruthy();
   });
+
+
+  describe('when called generateRandomFigure()', () => {
+
+    beforeEach(() => {
+      figureService = new FigureService();
+    });
+
+    afterEach(() => {
+      figureService = null;
+    });
+
+    it('should be return some object', () => {
+      const figure: Figure = figureService.generateRandomFigure();
+
+      expect(figure).toBeTruthy();
+    });
+
+    it('should be return Figure Object', () => {
+      const figure: Figure = figureService.generateRandomFigure();
+      expect(figure instanceof Figure).toBeTruthy();
+    });
+  });
+
 });
 
-describe('FigureService.generateRandomFigure()', () => {
-
-  let figureService: FigureService;
-
-  beforeEach(() => {
-    figureService = new FigureService();
-  });
-
-  it('should be return some object', () => {
-    const figure: Figure = figureService.generateRandomFigure();
-
-    expect(figure).toBeTruthy();
-  });
-
-  it('should be return Figure Object', () => {
-    const figure: Figure = figureService.generateRandomFigure();
-    expect(figure instanceof Figure).toBeTruthy();
-  });
-});

@@ -14,110 +14,124 @@ describe('BoardService', () => {
     boardService = TestBed.get(BoardService);
   });
 
+  afterEach(() => {
+    boardService = null;
+  });
+
   it('should be created', () => {
     expect(boardService).toBeTruthy();
   });
+
+  describe('when called generatePlayingArea()', () => {
+    beforeEach(() => {
+      boardService = TestBed.get(BoardService);
+    });
+
+    afterEach(() => {
+      boardService = null;
+    });
+
+    it('should be returned array of arrays', () => {
+      const playingArea: PlayingArea = boardService.generatePlayingArea();
+      expect(Array.isArray(playingArea)).toBeTruthy();
+      expect(Array.isArray(playingArea[0])).toBeTruthy();
+    });
+
+    it('playingArea should be created with default size if arguments do not pass', () => {
+      const playingArea = boardService.generatePlayingArea();
+
+      expect(playingArea.length).toBe(TETRIS_CONSTANTS.PLAYING_AREA_SYZE_Y);
+      expect(playingArea[0].length).toBe(TETRIS_CONSTANTS.PLAYING_AREA_SYZE_X);
+    });
+
+    it('playingArea should be created with exact passed params size', () => {
+      const sizeX = 3;
+      const sizeY = 8;
+
+      const playingArea = boardService.generatePlayingArea(sizeX, sizeY);
+      expect(playingArea.length).toBe(sizeY);
+      expect(playingArea[0].length).toBe(sizeX);
+    });
+  });
+
+  describe('when called removeFullRowFromPlayingArea()', () => {
+    beforeEach(() => {
+      boardService = TestBed.get(BoardService);
+    });
+
+    afterEach(() => {
+      boardService = null;
+    });
+
+    it('should throw an error whenever a playingArea is invalid', () => {
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(null, 0);
+      }).toThrowError(/PlayingArea param is invalid/);
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(undefined, 0);
+      }).toThrowError(/PlayingArea param is invalid/);
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea([], 0);
+      }).toThrowError(/PlayingArea param is invalid/);
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea([null], 0);
+      }).toThrowError(/PlayingArea param is invalid/);
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea([[]], 0);
+      }).toThrowError(/PlayingArea param is invalid/);
+    });
+
+    it('should throw an error whenever index is invalid', () => {
+      const playingArea: PlayingArea = boardService.generatePlayingArea();
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(playingArea, -1);
+      }).toThrowError(/Index is invalid/);
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(playingArea, NaN);
+      }).toThrowError(/Index is invalid/);
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(playingArea, -Infinity);
+      }).toThrowError(/Index is invalid/);
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(playingArea, +Infinity);
+      }).toThrowError(/Index is invalid/);
+
+      expect(() => {
+        boardService.removeFullRowFromPlayingArea(playingArea, playingArea.length);
+      }).toThrowError(/Index is invalid/);
+    });
+
+    it('should remove row by index', () => {
+      const playingArea: PlayingArea = boardService.generatePlayingArea();
+      const removedRowIndex = 8;
+      const removedRow = playingArea[removedRowIndex];
+
+      boardService.removeFullRowFromPlayingArea(playingArea, removedRowIndex);
+
+      expect(playingArea.findIndex(row => row === removedRow)).toBe(-1);
+    });
+
+    it('playingArea size should not be changed', () => {
+      const playingArea: PlayingArea = boardService.generatePlayingArea();
+      const rowIndex = 0;
+      const lengthBefore = playingArea.length;
+      let lengthAfter: number;
+
+      boardService.removeFullRowFromPlayingArea(playingArea, rowIndex);
+
+      lengthAfter = playingArea.length;
+
+      expect(lengthBefore).toBe(lengthAfter);
+    });
+  });
+
 });
 
-describe('BoardService.generatePlayingArea()', () => {
-  let boardService: BoardService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    boardService = TestBed.get(BoardService);
-  });
-
-  it('should be array of arrays', () => {
-    const playingArea = boardService.generatePlayingArea();
-    expect(Array.isArray(playingArea)).toBeTruthy();
-    expect(Array.isArray(playingArea[0])).toBeTruthy();
-  });
-
-  it('should be created with default size if arguments do not pass', () => {
-    const playingArea = boardService.generatePlayingArea();
-    expect(playingArea.length).toBe(TETRIS_CONSTANTS.PLAYING_AREA_SYZE_Y);
-    expect(playingArea[0].length).toBe(TETRIS_CONSTANTS.PLAYING_AREA_SYZE_X);
-  });
-
-  it('should be created with exact size', () => {
-    const sizeX = 3;
-    const sizeY = 8;
-
-    const playingArea = boardService.generatePlayingArea(sizeX, sizeY);
-    expect(playingArea.length).toBe(sizeY);
-    expect(playingArea[0].length).toBe(sizeX);
-  });
-});
-
-describe('BoardService.removeFullRowFromPlayingArea()', () => {
-  let boardService: BoardService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    boardService = TestBed.get(BoardService);
-  });
-
-  it('should cause an error with invalid playingArea param', () => {
-
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(null, 0);
-    }).toThrowError(/PlayingArea param is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(undefined, 0);
-    }).toThrowError(/PlayingArea param is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea([], 0);
-    }).toThrowError(/PlayingArea param is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea([null], 0);
-    }).toThrowError(/PlayingArea param is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea([[]], 0);
-    }).toThrowError(/PlayingArea param is invalid/);
-  });
-
-  it('should cause an error with invalid index param', () => {
-    const playingArea: PlayingArea = boardService.generatePlayingArea();
-
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(playingArea, -1);
-    }).toThrowError(/Index is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(playingArea, playingArea.length);
-    }).toThrowError(/Index is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(playingArea, NaN);
-    }).toThrowError(/Index is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(playingArea, -Infinity);
-    }).toThrowError(/Index is invalid/);
-    expect(() => {
-      boardService.removeFullRowFromPlayingArea(playingArea, +Infinity);
-    }).toThrowError(/Index is invalid/);
-  });
-
-  it('should remove row by index', () => {
-    const playingArea: PlayingArea = boardService.generatePlayingArea();
-    const removedRowIndex = 8;
-    const removedRow = playingArea[removedRowIndex];
-
-    boardService.removeFullRowFromPlayingArea(playingArea, removedRowIndex);
-
-    expect(playingArea.findIndex(row => row === removedRow)).toBe(-1);
-  });
-
-  it('should not change playingArea size', () => {
-    const playingArea: PlayingArea = boardService.generatePlayingArea();
-    const rowIndex = 0;
-    const lengthBefore = playingArea.length;
-
-    boardService.removeFullRowFromPlayingArea(playingArea, rowIndex);
-
-    const lengthAfter = playingArea.length;
-
-    expect(lengthBefore).toBe(lengthAfter);
-  });
-});
 
 describe('BoardService.canSetFigureToPlayingArea()', () => {
   let boardService: BoardService;
