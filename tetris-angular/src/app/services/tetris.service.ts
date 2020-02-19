@@ -116,7 +116,7 @@ export class TetrisService {
     }
   }
 
-  public moveFigureByPressedKey(key: string = null) {
+  public moveFigureByPressedKey(key: string = null): boolean {
     if (key === null || this.gameStatusSubject.getValue() !== TETRIS_CONSTANTS.GAME_STATUSES.PLAY) {
       return false;
     }

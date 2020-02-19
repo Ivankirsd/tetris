@@ -3,15 +3,26 @@ import {AppComponent} from './app.component';
 import {BoardComponent} from './components/board/board.component';
 import {ScoreComponent} from './components/score/score.component';
 import {MenuComponent} from './components/menu/menu.component';
-import {FigureComponent} from "./components/score/figure/figure.component";
-import tetrisConstants from "./contants/tetrisConstants";
-import {of} from "rxjs";
-import {TetrisService} from "./services/tetris.service";
-import {By} from "@angular/platform-browser";
+import {FigureComponent} from './components/score/figure/figure.component';
+import tetrisConstants from './contants/tetrisConstants';
+import {TetrisService} from './services/tetris.service';
+import {By} from '@angular/platform-browser';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {GameStatus, PlayingArea} from './models/types';
+import {Figure} from './classes/figure';
+
+const tetrisServiceSub: Partial<TetrisService> = {
+  moveFigureByPressedKey: (key: string = null): boolean => {
+    return;
+  },
+  gameStatusSubject: new BehaviorSubject<GameStatus>(tetrisConstants.GAME_STATUSES.START),
+  playingAreaWithFigureSubject: new Subject<[PlayingArea, Figure]>(),
+  scoreSubject: new BehaviorSubject<number>(0),
+};
 
 describe('AppComponent', () => {
   let appComponent: AppComponent;
-  let appComponentFixture: ComponentFixture<AppComponent>;
+  let appFixture: ComponentFixture<AppComponent>;
   let tetrisService: TetrisService;
 
   beforeEach(async(() => {
@@ -23,16 +34,25 @@ describe('AppComponent', () => {
         MenuComponent,
         FigureComponent,
       ],
+      providers: [
+        {provide: TetrisService, useValue: tetrisServiceSub}
+      ]
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    appComponentFixture = TestBed.createComponent(AppComponent);
-    appComponent = appComponentFixture.componentInstance;
+    appFixture = TestBed.createComponent(AppComponent);
+    appComponent = appFixture.componentInstance;
 
     tetrisService = TestBed.get(TetrisService);
 
-    appComponentFixture.detectChanges();
+    appFixture.detectChanges();
+  });
+
+  afterEach(() => {
+    appFixture.destroy();
+    appComponent = null;
+    tetrisService = null;
   });
 
   it('should create the app', () => {
@@ -41,36 +61,38 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should view MenuComponent if game status is not "${tetrisConstants.GAME_STATUSES.PLAY}"`, () => {
-    tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.START);
-    appComponentFixture.detectChanges();
+  describe('when called moveFigureByPressedKey()', () => {
+    it('should be called tetrisService.moveFigureByPressedKey()', () => {
+      const moveFigureByPressedKeySpy = spyOn(tetrisService, 'moveFigureByPressedKey');
 
-    expect(appComponentFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
+      appComponent.moveFigureByPressedKey({key: 'any'});
 
-    tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.PLAY);
-    appComponentFixture.detectChanges();
-
-    expect(appComponentFixture.debugElement.query(By.css('app-menu'))).toBeFalsy();
-
-    tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.PAUSE);
-    appComponentFixture.detectChanges();
-
-    expect(appComponentFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
-
-    tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.END);
-    appComponentFixture.detectChanges();
-
-    expect(appComponentFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
-
+      expect(moveFigureByPressedKeySpy).toHaveBeenCalled();
+    });
   });
 
-  it('should call tetrisService.moveFigureByPressedKey() if keydown event is triggered', () => {
-    const keyMock = 'ArrowUp';
-    const moveFigureByPressedKeySpy = spyOn(tetrisService, 'moveFigureByPressedKey');
+  describe(`when game status is "${tetrisConstants.GAME_STATUSES.START}" or "${
+    tetrisConstants.GAME_STATUSES.PAUSE}" or "${tetrisConstants.GAME_STATUSES.END}"`, () => {
+    it('MenuComponent should view', () => {
+      tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.START);
+      appFixture.detectChanges();
+      expect(appFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
 
-    appComponent.moveFigureByPressedKey({key: keyMock});
-    expect(moveFigureByPressedKeySpy).toHaveBeenCalledWith(keyMock);
+      tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.PAUSE);
+      appFixture.detectChanges();
+      expect(appFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
+
+      tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.END);
+      appFixture.detectChanges();
+      expect(appFixture.debugElement.query(By.css('app-menu'))).toBeTruthy();
+    });
   });
 
-
+  describe(`when game status is "${tetrisConstants.GAME_STATUSES.PLAY}"`, () => {
+    it('MenuComponent should not view', () => {
+      tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.PLAY);
+      appFixture.detectChanges();
+      expect(appFixture.debugElement.query(By.css('app-menu'))).toBeFalsy();
+    });
+  });
 });

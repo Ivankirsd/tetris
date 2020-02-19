@@ -8,6 +8,7 @@ import {DebugElement} from '@angular/core';
 describe('FigureComponent', () => {
   let component: FigureComponent;
   let fixture: ComponentFixture<FigureComponent>;
+  let figureService: FigureService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -23,45 +24,62 @@ describe('FigureComponent', () => {
     fixture = TestBed.createComponent(FigureComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    figureService = TestBed.get(FigureService);
+  });
+
+  afterEach(() => {
+    figureService = null;
+    fixture.destroy();
+    component = null;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('setting figure should set figureModel', () => {
-    const figureService = TestBed.get(FigureService);
-    component.figure = figureService.generateRandomFigure();
+  describe('when figure sets ', () => {
+    it('should be set figureModel', () => {
+      const figures = [
+        figureService.generateRandomFigure(),
+        figureService.generateRandomFigure(),
+      ];
 
-    expect(component.figureModel).toBeTruthy();
-  });
+      figures.forEach(figure => {
+        component.figure = figure;
+        fixture.detectChanges();
 
-  it('setting figureModel should render figure template ', () => {
-    let rowsCount: number;
-    let cellCount: number;
+        expect(component.figureModel).toBe(figure.getFigureModel());
+      });
+    });
 
-    const figureModels = [
-      [
-        [1, 1],
-        [1, 1],
-      ], [
-        [1, 1, 1, 1],
-      ]
-    ];
+    it('should be rendered figureModel in template ', () => {
+      let rowsCount: number;
+      let cellCount: number;
 
-    figureModels.forEach(figureModel => {
-      component.figureModel = figureModel;
-      fixture.detectChanges();
+      const figureModels = [
+        [
+          [1, 1],
+          [1, 1],
+        ], [
+          [1, 1, 1, 1],
+        ]
+      ];
 
-      rowsCount = fixture.debugElement.queryAll(By.css('.row')).length;
-      cellCount = fixture.debugElement.queryAll(By.css('.cell')).length / rowsCount;
+      figureModels.forEach(figureModel => {
+        component.figureModel = figureModel;
+        fixture.detectChanges();
 
-      expect(rowsCount).toBe(figureModel.length);
-      expect(cellCount).toBe(figureModel[0].length);
+        rowsCount = fixture.debugElement.queryAll(By.css('.row')).length;
+        cellCount = fixture.debugElement.queryAll(By.css('.cell')).length / rowsCount;
+
+        expect(rowsCount).toBe(figureModel.length);
+        expect(cellCount).toBe(figureModel[0].length);
+      });
     });
   });
 
-  it('active cells should coincide with figure', fakeAsync(() => {
+  describe('when figureModel rendered', () => {
+    it('active cells should coincide with figureModel', fakeAsync(() => {
       let figureRows: DebugElement[];
       let figureRowCells: DebugElement[];
 
@@ -85,14 +103,16 @@ describe('FigureComponent', () => {
         fixture.detectChanges();
 
         figureRows = fixture.debugElement.queryAll(By.css('.row'));
+
         figureModel.forEach((row, i) => {
           figureRowCells = figureRows[i].queryAll(By.css('.cell'));
+
           row.forEach((cell, j) => {
 
             expect(figureRowCells[j].nativeElement.classList.contains('active-cell')).toBe(!!cell);
           });
         });
       });
-    }
-  ));
+    }));
+  });
 });

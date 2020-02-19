@@ -4,14 +4,20 @@ import {ScoreComponent} from './score.component';
 import {FigureService} from '../../services/figure.service';
 import {FigureComponent} from './figure/figure.component';
 import {TetrisService} from '../../services/tetris.service';
-import tetrisConstants from '../../contants/tetrisConstants';
 import {By} from '@angular/platform-browser';
+import {of} from "rxjs";
+
+const tetrisServiceSub: Partial<TetrisService> = {
+  pauseGame: (): void => {
+  },
+};
 
 describe('ScoreComponent', () => {
   let scoreComponent: ScoreComponent;
   let scoreFixture: ComponentFixture<ScoreComponent>;
-  let figureFixture: ComponentFixture<FigureComponent>;
-  let figureComponent: FigureComponent;
+
+  let tetrisService: TetrisService;
+  let figureService: FigureService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -19,162 +25,103 @@ describe('ScoreComponent', () => {
         ScoreComponent,
         FigureComponent
       ],
+      providers: [
+        {provide: TetrisService, useValue: tetrisServiceSub},
+        FigureService,
+      ]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
     scoreFixture = TestBed.createComponent(ScoreComponent);
-    figureFixture = TestBed.createComponent(FigureComponent);
-
     scoreComponent = scoreFixture.componentInstance;
-    figureComponent = figureFixture.componentInstance;
 
     scoreFixture.detectChanges();
+  });
+
+  afterEach(() => {
+    scoreFixture.destroy();
+
+    scoreComponent = null;
+    scoreFixture = null;
   });
 
   it('should create', () => {
     expect(scoreComponent).toBeTruthy();
   });
-});
+  describe('when called pauseGame()', () => {
 
-describe('ScoreComponent.pauseGame()', () => {
-  let scoreComponent: ScoreComponent;
-  let scoreFixture: ComponentFixture<ScoreComponent>;
-  let figureFixture: ComponentFixture<FigureComponent>;
-  let figureComponent: FigureComponent;
-  let tetrisService: TetrisService;
+    beforeEach(() => {
+      tetrisService = TestBed.get(TetrisService);
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        ScoreComponent,
-        FigureComponent,
-      ],
-      providers: [
-        TetrisService,
-      ],
-    })
-      .compileComponents();
-  }));
+    });
 
-  beforeEach(() => {
-    tetrisService = TestBed.get(TetrisService);
+    afterEach(() => {
+      tetrisService = null;
+    });
 
-    scoreFixture = TestBed.createComponent(ScoreComponent);
-    figureFixture = TestBed.createComponent(FigureComponent);
-    scoreComponent = scoreFixture.componentInstance;
-    figureComponent = figureFixture.componentInstance;
+    it('should be called tetrisService.pauseGame()', () => {
+      const pauseGameSpy = spyOn(tetrisService, 'pauseGame');
+      const pauseBtnEl = scoreFixture.debugElement.query(By.css('#pause-btn'));
 
-    scoreFixture.detectChanges();
+      pauseBtnEl.triggerEventHandler('click', null);
+
+      expect(pauseGameSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('click on pause-btn should call tetrisService.pauseGame()', () => {
-    const pauseGameSpy = spyOn(tetrisService, 'pauseGame');
-    const pauseBtnEl = scoreFixture.debugElement.query(By.css('#pause-btn'));
+  describe('when score value is updated', () => {
+    it('score value should be updated in template', () => {
+      const scoreEl = scoreFixture.debugElement.query(By.css('#score'));
+      const scoreValues = [0, 5, 15, 1000];
 
-    pauseBtnEl.triggerEventHandler('click', null);
+      scoreValues.forEach(scoreValue => {
+        scoreComponent.score$ = of(scoreValue);
+        scoreFixture.detectChanges();
 
-    expect(pauseGameSpy).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('ScoreComponent score template value', () => {
-  let scoreComponent: ScoreComponent;
-  let scoreFixture: ComponentFixture<ScoreComponent>;
-  let figureFixture: ComponentFixture<FigureComponent>;
-  let figureComponent: FigureComponent;
-
-  let tetrisService: TetrisService;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        ScoreComponent,
-        FigureComponent,
-      ],
-      providers: [
-        TetrisService,
-      ],
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
-    tetrisService = TestBed.get(TetrisService);
-
-    scoreFixture = TestBed.createComponent(ScoreComponent);
-    figureFixture = TestBed.createComponent(FigureComponent);
-    scoreComponent = scoreFixture.componentInstance;
-    figureComponent = figureFixture.componentInstance;
-
-    scoreFixture.detectChanges();
+        expect(scoreEl.nativeElement.innerHTML).toMatch(`Score ${scoreValue}`);
+      });
+    });
   });
 
-  it('changing score value should update template score value', () => {
-    const scoreEl = scoreFixture.debugElement.query(By.css('#score'));
-    const newScore = 1000;
+  describe('when figures are updated', () => {
+    beforeEach(() => {
+      figureService = TestBed.get(FigureService);
+    });
 
-    tetrisService.scoreSubject.next(newScore);
-    scoreFixture.detectChanges();
+    afterEach(() => {
+      figureService = null;
+    });
 
-    expect(scoreEl.nativeElement.innerHTML).toMatch(`Score ${newScore}`);
+    it(`figues template should be updated`, () => {
+      let figuresElements;
+
+      const figuresArrays = [
+        [figureService.generateRandomFigure()],
+        [figureService.generateRandomFigure(), figureService.generateRandomFigure()],
+        [figureService.generateRandomFigure(), figureService.generateRandomFigure(), figureService.generateRandomFigure()],
+      ];
+
+      figuresArrays.forEach(figures => {
+        scoreComponent.figures$ = of(figures);
+        scoreFixture.detectChanges();
+        figuresElements = scoreFixture.debugElement.queryAll(By.css('app-figure'));
+
+        expect(figuresElements.length).toBe(figures.length);
+      });
+    });
+
+    it('figure should be set to figureComponent', () => {
+      const figures = [figureService.generateRandomFigure()];
+      scoreComponent.figures$ = of(figures);
+      scoreFixture.detectChanges();
+
+      const figureEl = scoreFixture.debugElement.query(By.css('app-figure'));
+      const figureComponent: FigureComponent = figureEl.componentInstance;
+      scoreFixture.detectChanges();
+
+      expect(figureComponent.figureModel).toBe(figures[0].getFigureModel());
+    });
   });
 });
-
-describe('ScoreComponent figures ', () => {
-  let scoreComponent: ScoreComponent;
-  let scoreFixture: ComponentFixture<ScoreComponent>;
-  let figureFixture: ComponentFixture<FigureComponent>;
-  let figureComponent: FigureComponent;
-
-  let figureService: FigureService;
-  let tetrisService: TetrisService;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        ScoreComponent,
-        FigureComponent,
-      ],
-      providers: [
-        FigureService,
-        TetrisService,
-      ],
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
-    figureService = TestBed.get(FigureService);
-    tetrisService = TestBed.get(TetrisService);
-
-    scoreFixture = TestBed.createComponent(ScoreComponent);
-    figureFixture = TestBed.createComponent(FigureComponent);
-
-    scoreComponent = scoreFixture.componentInstance;
-    figureComponent = figureFixture.componentInstance;
-
-
-    scoreFixture.detectChanges();
-  });
-
-  it(`changing figuresArray value should update template figures`, () => {
-    let figuresElements = scoreFixture.debugElement.queryAll(By.css('app-figure'));
-
-    expect(figuresElements.length).toBe(0);
-
-    tetrisService.figuresArraySubject.next(
-      [
-        figureService.generateRandomFigure(),
-        figureService.generateRandomFigure(),
-      ]
-    );
-    scoreFixture.detectChanges();
-
-    figuresElements = scoreFixture.debugElement.queryAll(By.css('app-figure'));
-
-    expect(figuresElements.length).toBe(2);
-  });
-});
-

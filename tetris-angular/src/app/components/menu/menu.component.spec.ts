@@ -4,15 +4,30 @@ import {MenuComponent} from './menu.component';
 import {TetrisService} from '../../services/tetris.service';
 import tetrisConstants from '../../contants/tetrisConstants';
 import {By} from '@angular/platform-browser';
-import {BoardService} from "../../services/board.service";
+import {BoardService} from '../../services/board.service';
+import {BehaviorSubject, of} from 'rxjs';
+import {GameStatus} from '../../models/types';
+import {FigureService} from '../../services/figure.service';
+
+
+const tetrisServiceStub: Partial<TetrisService> = {
+  scoreSubject: new BehaviorSubject<number>(0),
+  gameStatusSubject: new BehaviorSubject<GameStatus>(tetrisConstants.GAME_STATUSES.START),
+  startGame: () => {},
+  continueGame: () => {}
+};
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
   let fixture: ComponentFixture<MenuComponent>;
+  let tetrisService: TetrisService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [MenuComponent]
+      declarations: [MenuComponent],
+      providers: [
+        {provide: TetrisService, useValue: tetrisServiceStub, deps: [BoardService, FigureService]},
+      ]
     })
       .compileComponents();
   }));
@@ -26,132 +41,101 @@ describe('MenuComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-});
 
-describe('MenuComponent.continueGame()', () => {
-  let component: MenuComponent;
-  let fixture: ComponentFixture<MenuComponent>;
-  let tetrisService: TetrisService;
+  describe('when created', () => {
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [MenuComponent],
-      providers: [TetrisService]
-    })
-      .compileComponents();
-  }));
+    describe('score', () => {
 
-  beforeEach(() => {
-    tetrisService = TestBed.get(TetrisService);
-    fixture = TestBed.createComponent(MenuComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      beforeEach(() => {
+        tetrisService = TestBed.get(TetrisService);
+        fixture = TestBed.createComponent(MenuComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+      });
+
+      afterEach(() => {
+        tetrisService = null;
+        fixture.destroy();
+        fixture = null;
+        component = null;
+      });
+
+      it(`should contain "Score \${score}" if game status is "${tetrisConstants.GAME_STATUSES.PAUSE}"`, () => {
+        const scoreValue = 1000;
+        tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.PAUSE);
+        tetrisService.scoreSubject.next(scoreValue);
+
+        fixture.detectChanges();
+
+        const scoreResultEl = fixture.debugElement.query(By.css('#score-result'));
+
+        expect(scoreResultEl.nativeElement.innerHTML).toMatch(`Score ${scoreValue}`);
+      });
+
+      it(`should contain "Game over!" and "Your score is \${score}" if game status is "${
+        tetrisConstants.GAME_STATUSES.END}"`, fakeAsync(() => {
+        const scoreValue = 1000;
+        tetrisService.gameStatusSubject.next(tetrisConstants.GAME_STATUSES.END);
+        tetrisService.scoreSubject.next(scoreValue);
+
+        tick(3000);
+        fixture.detectChanges();
+        const scoreResultEl = fixture.debugElement.query(By.css('#score-result'));
+
+        expect(scoreResultEl.nativeElement.innerHTML).toMatch(/Game over!/);
+        expect(scoreResultEl.nativeElement.innerText).toMatch(`Your score is ${scoreValue}`);
+      }));
+    });
   });
 
-  it('continueGame button should call tetrisService.continueGame()', () => {
-    const continueGameSpy = spyOn(tetrisService, 'continueGame');
-    component.displayContinueGameBtn$ = true;
-    fixture.detectChanges();
-    const continueBtnEl = fixture.debugElement.query(By.css('#continue-btn'));
-    tetrisService.startGame();
-    tetrisService.pauseGame();
-    continueBtnEl.triggerEventHandler('click', null);
+  describe('when called startGame()', () => {
+    beforeEach(() => {
+      tetrisService = TestBed.get(TetrisService);
+      fixture = TestBed.createComponent(MenuComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
 
-    expect(continueGameSpy).toHaveBeenCalled();
+    afterEach(() => {
+      tetrisService = null;
+      fixture.destroy();
+      fixture = null;
+      component = null;
+    });
 
-    tetrisService.pauseGame();
-  });
-});
+    it(`should be called tetriceService.startGame()`, () => {
+      const startGameSpy = spyOn(tetrisService, 'startGame');
+      const startGameBtnEl = fixture.debugElement.query(By.css('#start-game-btn'));
+      startGameBtnEl.triggerEventHandler('click', null);
 
-describe('MenuComponent.startGame()', () => {
-  let component: MenuComponent;
-  let fixture: ComponentFixture<MenuComponent>;
-  let tetrisService: TetrisService;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [MenuComponent],
-      providers: [
-        TetrisService,
-      ]
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
-    tetrisService = TestBed.get(TetrisService);
-    fixture = TestBed.createComponent(MenuComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      expect(startGameSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it(`startGame button should call tetriceService.startGame()`, () => {
-    const startGameSpy = spyOn(tetrisService, 'startGame');
-    const startGameBtnEl = fixture.debugElement.query(By.css('#start-game-btn'));
-    startGameBtnEl.triggerEventHandler('click', null);
+  describe('when called continueGame()', () => {
+    beforeEach(() => {
+      tetrisService = TestBed.get(TetrisService);
+      fixture = TestBed.createComponent(MenuComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+    afterEach(() => {
+      tetrisService = null;
+      fixture.destroy();
+      fixture = null;
+      component = null;
+    });
 
-    expect(startGameSpy).toHaveBeenCalledTimes(1);
+    it('should be called tetrisService.continueGame()', fakeAsync(() => {
+      component.displayContinueGameBtn$ = true;
+      fixture.detectChanges();
 
-    tetrisService.pauseGame();
+      const continueGameSpy = spyOn(tetrisService, 'continueGame');
+      const continueBtnEl = fixture.debugElement.query(By.css('#continue-btn'));
+
+      continueBtnEl.triggerEventHandler('click', null);
+
+      expect(continueGameSpy).toHaveBeenCalled();
+    }));
   });
-});
-
-describe('MenuComponent score result', () => {
-  let component: MenuComponent;
-  let fixture: ComponentFixture<MenuComponent>;
-  let tetrisService: TetrisService;
-  let boardService: BoardService;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [MenuComponent],
-      providers: [
-        TetrisService,
-        BoardService
-      ]
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
-    tetrisService = TestBed.get(TetrisService);
-    boardService = TestBed.get(BoardService);
-    fixture = TestBed.createComponent(MenuComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it(`should contain "Score 'score'" if game status is ${tetrisConstants.GAME_STATUSES.PAUSE}`, fakeAsync(() => {
-    const scoreValue = 1000;
-    tetrisService.startGame();
-    tetrisService.scoreSubject.next(scoreValue);
-
-    tetrisService.pauseGame();
-    fixture.detectChanges();
-
-    const scoreResultEl = fixture.debugElement.query(By.css('#score-result'));
-
-    expect(scoreResultEl.nativeElement.innerHTML).toMatch(`Score ${scoreValue}`);
-  }));
-
-  it(`should contain "Game over!" and "Your score is 'score'" if game status is ${tetrisConstants.GAME_STATUSES.END}`, fakeAsync(() => {
-    const playingAreaFake = [
-      [null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ];
-    const playingAreaSpy = spyOn(boardService, 'generatePlayingArea').and.returnValue(playingAreaFake);
-    const scoreValue = 1000;
-
-    tetrisService.startGame();
-    tetrisService.scoreSubject.next(scoreValue);
-
-    tick(3000);
-    fixture.detectChanges();
-    const scoreResultEl = fixture.debugElement.query(By.css('#score-result'));
-
-    expect(scoreResultEl.nativeElement.innerHTML).toMatch(/Game over!/);
-    expect(scoreResultEl.nativeElement.innerText).toMatch(`Your score is ${scoreValue}`);
-  }));
 });
