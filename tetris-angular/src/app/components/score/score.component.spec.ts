@@ -7,7 +7,7 @@ import {TetrisService} from '../../services/tetris.service';
 import {By} from '@angular/platform-browser';
 import {of} from "rxjs";
 
-const tetrisServiceSub: Partial<TetrisService> = {
+const tetrisServiceStub: Partial<TetrisService> = {
   pauseGame: (): void => {
   },
 };
@@ -26,7 +26,7 @@ describe('ScoreComponent', () => {
         FigureComponent
       ],
       providers: [
-        {provide: TetrisService, useValue: tetrisServiceSub},
+        {provide: TetrisService, useValue: tetrisServiceStub},
         FigureService,
       ]
     })

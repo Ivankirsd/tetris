@@ -11,7 +11,7 @@ import {BehaviorSubject, Subject} from 'rxjs';
 import {GameStatus, PlayingArea} from './models/types';
 import {Figure} from './classes/figure';
 
-const tetrisServiceSub: Partial<TetrisService> = {
+const tetrisServiceStub: Partial<TetrisService> = {
   moveFigureByPressedKey: (key: string = null): boolean => {
     return;
   },
@@ -35,7 +35,7 @@ describe('AppComponent', () => {
         FigureComponent,
       ],
       providers: [
-        {provide: TetrisService, useValue: tetrisServiceSub}
+        {provide: TetrisService, useValue: tetrisServiceStub}
       ]
     }).compileComponents();
   }));

@@ -10,7 +10,7 @@ import {Subject} from 'rxjs';
 import {PlayingArea} from '../../models/types';
 import {take} from 'rxjs/operators';
 
-const tetrisServiceSub: Partial<TetrisService> = {
+const tetrisServiceStub: Partial<TetrisService> = {
   playingAreaWithFigureSubject: new Subject<[PlayingArea, Figure]>(),
 };
 
@@ -33,7 +33,7 @@ describe('BoardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [BoardComponent],
       providers: [
-        {provide: TetrisService, useValue: tetrisServiceSub},
+        {provide: TetrisService, useValue: tetrisServiceStub},
         {provide: BoardService, useValue: boardServiceSub},
         FigureService,
       ]
